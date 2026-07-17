@@ -6,10 +6,16 @@ A simple, dependency-free to-do list web app built with vanilla HTML, CSS, and J
 
 - ✅ Add tasks (type and press **Enter** or click **Add**)
 - ☑️ Mark tasks complete with a checkbox (adds a strikethrough)
-- 🗑️ Delete individual tasks
-- 🧹 Clear all completed tasks at once
-- 🔢 Live counter of remaining tasks
-- 💾 Persistence via `localStorage` — tasks survive a refresh
+- ✏️ **Edit** a task inline by double-clicking it (Enter to save, Esc to cancel)
+- 🎯 **Priorities** — Low / Medium / High, shown as a colored dot
+- 📅 **Due dates** — optional per task, with **overdue** highlighting
+- 🔎 **Search** tasks by text
+- 🗂️ **Filters** — All / Active / Completed
+- ↕️ **Drag-and-drop** to reorder tasks
+- 🌙 **Dark mode** toggle (remembered between visits)
+- 📊 **Progress bar** and live count of remaining tasks
+- 🧹 Clear completed, or clear all tasks
+- 💾 Persistence via `localStorage` — tasks and theme survive a refresh
 - 📱 Responsive, single-file, no build step or dependencies
 
 ## Usage
