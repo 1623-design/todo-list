@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 16px;
+  }
+  .app {
+    background: #fff;
+    width: 100%;
+    max-width: 460px;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    overflow: hidden;
+  }
+  header {
+    padding: 28px 28px 20px;
+  }
+  h1 { font-size: 24px; color: #2d2d44; }
+  .sub { color: #8a8aa0; font-size: 13px; margin-top: 4px; }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 28px 20px;
+  }
+  #new-task {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e5e5ef;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  #new-task:focus { border-color: #764ba2; }
+  #add-btn {
+    background: #764ba2;
+    color: #fff;
+    border: none;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #add-btn:hover { background: #5f3a86; }
+  ul { list-style: none; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    border-top: 1px solid #f0f0f5;
+    animation: slide .2s ease;
+  }
+  @keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
+  li .cb {
+    width: 20px; height: 20px;
+    cursor: pointer; accent-color: #764ba2;
+    flex-shrink: 0;
+  }
+  li .text { flex: 1; font-size: 15px; color: #2d2d44; word-break: break-word; }
+  li.done .text { text-decoration: line-through; color: #b0b0c0; }
+  li .del {
+    background: none; border: none;
+    color: #c0c0d0; font-size: 20px;
+    cursor: pointer; line-height: 1;
+    transition: color .15s;
+  }
+  li .del:hover { color: #e5484d; }
+  .empty { padding: 30px 28px; text-align: center; color: #b0b0c0; font-size: 14px; }
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 28px;
+    border-top: 1px solid #f0f0f5;
+    font-size: 13px;
+    color: #8a8aa0;
+  }
+  #clear-done {
+    background: none; border: none;
+    color: #764ba2; cursor: pointer;
+    font-size: 13px; font-weight: 600;
+  }
+  #clear-done:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>My To-Do List</h1>
+      <div class="sub">Stay organized, one task at a time</div>
+    </header>
+    <div class="input-row">
+      <input id="new-task" type="text" placeholder="Add a new task..." autocomplete="off">
+      <button id="add-btn">Add</button>
+    </div>
+    <ul id="list"></ul>
+    <footer>
+      <span id="count">0 tasks left</span>
+      <button id="clear-done">Clear completed</button>
+    </footer>
+  </div>
+
+<script>
+  const KEY = 'todo.items';
+  let items = JSON.parse(localStorage.getItem(KEY) || '[]');
+
+  const list = document.getElementById('list');
+  const input = document.getElementById('new-task');
+  const count = document.getElementById('count');
+
+  function save() { localStorage.setItem(KEY, JSON.stringify(items)); }
+
+  function render() {
+    list.innerHTML = '';
+    if (items.length === 0) {
+      list.innerHTML = '<li class="empty">No tasks yet. Add one above!</li>';
+    } else {
+      items.forEach((item, i) => {
+        const li = document.createElement('li');
+        if (item.done) li.classList.add('done');
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'cb';
+        cb.checked = item.done;
+        cb.onchange = () => { items[i].done = cb.checked; save(); render(); };
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = item.text;
+
+        const del = document.createElement('button');
+        del.className = 'del';
+        del.innerHTML = '&times;';
+        del.onclick = () => { items.splice(i, 1); save(); render(); };
+
+        li.append(cb, text, del);
+        list.appendChild(li);
+      });
+    }
+    const left = items.filter(i => !i.done).length;
+    count.textContent = left + (left === 1 ? ' task left' : ' tasks left');
+  }
+
+  function add() {
+    const text = input.value.trim();
+    if (!text) return;
+    items.push({ text, done: false });
+    input.value = '';
+    save();
+    render();
+  }
+
+  document.getElementById('add-btn').onclick = add;
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+  document.getElementById('clear-done').onclick = () => {
+    items = items.filter(i => !i.done);
+    save();
+    render();
+  };
+
+  render();
+</script>
+</body>
+</html>
