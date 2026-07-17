@@ -5,46 +5,121 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>To-Do List</title>
 <style>
+  :root {
+    --bg-grad-1: #667eea;
+    --bg-grad-2: #764ba2;
+    --card: #ffffff;
+    --text: #2d2d44;
+    --text-soft: #8a8aa0;
+    --text-faint: #b0b0c0;
+    --border: #f0f0f5;
+    --border-strong: #e5e5ef;
+    --accent: #764ba2;
+    --accent-hover: #5f3a86;
+    --input-bg: #ffffff;
+    --chip-bg: #f3f3fa;
+    --danger: #e5484d;
+    --shadow: 0 20px 50px rgba(0,0,0,.25);
+    --prio-low: #3a9e6a;
+    --prio-med: #d68a1e;
+    --prio-high: #e5484d;
+  }
+  html[data-theme="dark"] {
+    --bg-grad-1: #1e2130;
+    --bg-grad-2: #2a1f3d;
+    --card: #23232f;
+    --text: #e8e8f0;
+    --text-soft: #9a9ab0;
+    --text-faint: #6a6a80;
+    --border: #32323f;
+    --border-strong: #3a3a48;
+    --accent: #9d7bd0;
+    --accent-hover: #b190e0;
+    --input-bg: #2c2c39;
+    --chip-bg: #2c2c39;
+    --danger: #f0656a;
+    --shadow: 0 20px 50px rgba(0,0,0,.5);
+    --prio-low: #57c98a;
+    --prio-med: #e6a23c;
+    --prio-high: #f0656a;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 60px 16px;
+    padding: 48px 16px;
+    transition: background .3s;
   }
   .app {
-    background: #fff;
+    background: var(--card);
     width: 100%;
-    max-width: 460px;
+    max-width: 520px;
     border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    box-shadow: var(--shadow);
     overflow: hidden;
+    transition: background .3s;
   }
   header {
-    padding: 28px 28px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 26px 28px 18px;
   }
-  h1 { font-size: 24px; color: #2d2d44; }
-  .sub { color: #8a8aa0; font-size: 13px; margin-top: 4px; }
+  h1 { font-size: 24px; color: var(--text); }
+  .sub { color: var(--text-soft); font-size: 13px; margin-top: 4px; }
+  #theme-toggle {
+    background: var(--chip-bg);
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s, transform .15s;
+  }
+  #theme-toggle:hover { transform: scale(1.08); }
+
+  /* Progress */
+  .progress-wrap { padding: 0 28px 16px; }
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--prio-low));
+    border-radius: 99px;
+    transition: width .3s ease;
+  }
+  .progress-label { font-size: 12px; color: var(--text-soft); margin-top: 6px; }
+
+  /* Input area */
   .input-row {
     display: flex;
     gap: 8px;
-    padding: 0 28px 20px;
+    padding: 0 28px 10px;
   }
   #new-task {
     flex: 1;
     padding: 12px 14px;
-    border: 2px solid #e5e5ef;
+    border: 2px solid var(--border-strong);
     border-radius: 10px;
     font-size: 15px;
     outline: none;
+    background: var(--input-bg);
+    color: var(--text);
     transition: border-color .15s;
   }
-  #new-task:focus { border-color: #764ba2; }
+  #new-task:focus { border-color: var(--accent); }
   #add-btn {
-    background: #764ba2;
+    background: var(--accent);
     color: #fff;
     border: none;
     padding: 0 20px;
@@ -54,84 +129,277 @@
     cursor: pointer;
     transition: background .15s;
   }
-  #add-btn:hover { background: #5f3a86; }
+  #add-btn:hover { background: var(--accent-hover); }
+  .options-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 28px 16px;
+    flex-wrap: wrap;
+  }
+  .options-row select, .options-row input[type="date"] {
+    padding: 8px 10px;
+    border: 2px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--input-bg);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  .options-row select:focus, .options-row input[type="date"]:focus { border-color: var(--accent); }
+
+  /* Toolbar: search + filters */
+  .toolbar {
+    padding: 0 28px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #search {
+    width: 100%;
+    padding: 9px 12px;
+    border: 2px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--input-bg);
+    color: var(--text);
+    outline: none;
+  }
+  #search:focus { border-color: var(--accent); }
+  .filters { display: flex; gap: 6px; }
+  .filter-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--chip-bg);
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn.active { background: var(--accent); color: #fff; }
+
+  /* List */
   ul { list-style: none; }
   li {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 28px;
-    border-top: 1px solid #f0f0f5;
+    padding: 13px 28px;
+    border-top: 1px solid var(--border);
     animation: slide .2s ease;
+    position: relative;
   }
+  li.dragging { opacity: .4; }
+  li.drag-over { border-top: 2px solid var(--accent); }
   @keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
-  li .cb {
-    width: 20px; height: 20px;
-    cursor: pointer; accent-color: #764ba2;
+  .handle {
+    cursor: grab;
+    color: var(--text-faint);
+    font-size: 14px;
+    user-select: none;
     flex-shrink: 0;
   }
-  li .text { flex: 1; font-size: 15px; color: #2d2d44; word-break: break-word; }
-  li.done .text { text-decoration: line-through; color: #b0b0c0; }
+  .handle:active { cursor: grabbing; }
+  li .cb {
+    width: 20px; height: 20px;
+    cursor: pointer; accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .prio-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .prio-low { background: var(--prio-low); }
+  .prio-med { background: var(--prio-med); }
+  .prio-high { background: var(--prio-high); }
+  .main-col { flex: 1; min-width: 0; }
+  li .text {
+    font-size: 15px;
+    color: var(--text);
+    word-break: break-word;
+    cursor: text;
+  }
+  li.done .text { text-decoration: line-through; color: var(--text-faint); }
+  .meta { font-size: 11px; color: var(--text-soft); margin-top: 3px; display: flex; gap: 8px; }
+  .due.overdue { color: var(--danger); font-weight: 600; }
+  .edit-input {
+    width: 100%;
+    font-size: 15px;
+    padding: 4px 6px;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text);
+    outline: none;
+  }
   li .del {
     background: none; border: none;
-    color: #c0c0d0; font-size: 20px;
+    color: var(--text-faint); font-size: 20px;
     cursor: pointer; line-height: 1;
     transition: color .15s;
+    flex-shrink: 0;
   }
-  li .del:hover { color: #e5484d; }
-  .empty { padding: 30px 28px; text-align: center; color: #b0b0c0; font-size: 14px; }
+  li .del:hover { color: var(--danger); }
+  .empty { padding: 34px 28px; text-align: center; color: var(--text-faint); font-size: 14px; }
+
   footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 28px;
-    border-top: 1px solid #f0f0f5;
+    padding: 15px 28px;
+    border-top: 1px solid var(--border);
     font-size: 13px;
-    color: #8a8aa0;
+    color: var(--text-soft);
   }
-  #clear-done {
+  .foot-btns { display: flex; gap: 14px; }
+  footer button {
     background: none; border: none;
-    color: #764ba2; cursor: pointer;
+    color: var(--accent); cursor: pointer;
     font-size: 13px; font-weight: 600;
   }
-  #clear-done:hover { text-decoration: underline; }
+  footer button:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>My To-Do List</h1>
-      <div class="sub">Stay organized, one task at a time</div>
+      <div>
+        <h1>My To-Do List</h1>
+        <div class="sub">Stay organized, one task at a time</div>
+      </div>
+      <button id="theme-toggle" title="Toggle dark mode">🌙</button>
     </header>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">0% complete</div>
+    </div>
+
     <div class="input-row">
       <input id="new-task" type="text" placeholder="Add a new task..." autocomplete="off">
       <button id="add-btn">Add</button>
     </div>
+    <div class="options-row">
+      <select id="prio-select" title="Priority">
+        <option value="low">🟢 Low</option>
+        <option value="med" selected>🟠 Medium</option>
+        <option value="high">🔴 High</option>
+      </select>
+      <input id="due-date" type="date" title="Due date">
+    </div>
+
+    <div class="toolbar">
+      <input id="search" type="text" placeholder="🔍 Search tasks..." autocomplete="off">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="active">Active</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+      </div>
+    </div>
+
     <ul id="list"></ul>
+
     <footer>
       <span id="count">0 tasks left</span>
-      <button id="clear-done">Clear completed</button>
+      <div class="foot-btns">
+        <button id="clear-done">Clear completed</button>
+        <button id="clear-all">Clear all</button>
+      </div>
     </footer>
   </div>
 
 <script>
-  const KEY = 'todo.items';
+  const KEY = 'todo.items.v2';
+  const THEME_KEY = 'todo.theme';
   let items = JSON.parse(localStorage.getItem(KEY) || '[]');
+  let filter = 'all';
+  let search = '';
+  let dragIndex = null;
 
   const list = document.getElementById('list');
   const input = document.getElementById('new-task');
+  const prioSelect = document.getElementById('prio-select');
+  const dueDate = document.getElementById('due-date');
+  const searchBox = document.getElementById('search');
   const count = document.getElementById('count');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const themeToggle = document.getElementById('theme-toggle');
 
   function save() { localStorage.setItem(KEY, JSON.stringify(items)); }
 
+  // ---- Theme ----
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    themeToggle.textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem(THEME_KEY, t);
+  }
+  themeToggle.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  };
+  applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+  // ---- Helpers ----
+  const todayStr = () => {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  };
+  const prioLabel = { low: 'Low', med: 'Medium', high: 'High' };
+  function fmtDate(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m-1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  function visibleItems() {
+    return items
+      .map((item, i) => ({ item, i }))
+      .filter(({ item }) => {
+        if (filter === 'active' && item.done) return false;
+        if (filter === 'completed' && !item.done) return false;
+        if (search && !item.text.toLowerCase().includes(search)) return false;
+        return true;
+      });
+  }
+
   function render() {
     list.innerHTML = '';
-    if (items.length === 0) {
-      list.innerHTML = '<li class="empty">No tasks yet. Add one above!</li>';
+    const vis = visibleItems();
+
+    if (vis.length === 0) {
+      const msg = items.length === 0
+        ? 'No tasks yet. Add one above!'
+        : 'No tasks match this view.';
+      list.innerHTML = '<li class="empty">' + msg + '</li>';
     } else {
-      items.forEach((item, i) => {
+      vis.forEach(({ item, i }) => {
         const li = document.createElement('li');
         if (item.done) li.classList.add('done');
+        li.draggable = true;
+
+        // drag handlers (reorder within full items array)
+        li.addEventListener('dragstart', () => { dragIndex = i; li.classList.add('dragging'); });
+        li.addEventListener('dragend', () => { li.classList.remove('dragging'); render(); });
+        li.addEventListener('dragover', e => { e.preventDefault(); li.classList.add('drag-over'); });
+        li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+        li.addEventListener('drop', e => {
+          e.preventDefault();
+          li.classList.remove('drag-over');
+          if (dragIndex === null || dragIndex === i) return;
+          const [moved] = items.splice(dragIndex, 1);
+          items.splice(i, 0, moved);
+          dragIndex = null;
+          save(); render();
+        });
+
+        const handle = document.createElement('span');
+        handle.className = 'handle';
+        handle.textContent = '⠿';
+        handle.title = 'Drag to reorder';
 
         const cb = document.createElement('input');
         cb.type = 'checkbox';
@@ -139,38 +407,120 @@
         cb.checked = item.done;
         cb.onchange = () => { items[i].done = cb.checked; save(); render(); };
 
-        const text = document.createElement('span');
+        const dot = document.createElement('span');
+        dot.className = 'prio-dot prio-' + (item.priority || 'med');
+        dot.title = prioLabel[item.priority || 'med'] + ' priority';
+
+        const mainCol = document.createElement('div');
+        mainCol.className = 'main-col';
+
+        const text = document.createElement('div');
         text.className = 'text';
         text.textContent = item.text;
+        text.title = 'Double-click to edit';
+        text.ondblclick = () => startEdit(i, mainCol, text);
+        mainCol.appendChild(text);
+
+        // meta line (priority label + due date)
+        const metaParts = [];
+        if (item.due) {
+          const overdue = !item.done && item.due < todayStr();
+          metaParts.push('<span class="due' + (overdue ? ' overdue' : '') + '">📅 ' +
+            fmtDate(item.due) + (overdue ? ' (overdue)' : '') + '</span>');
+        }
+        metaParts.push('<span>' + prioLabel[item.priority || 'med'] + '</span>');
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = metaParts.join('');
+        mainCol.appendChild(meta);
 
         const del = document.createElement('button');
         del.className = 'del';
         del.innerHTML = '&times;';
+        del.title = 'Delete';
         del.onclick = () => { items.splice(i, 1); save(); render(); };
 
-        li.append(cb, text, del);
+        li.append(handle, cb, dot, mainCol, del);
         list.appendChild(li);
       });
     }
+
+    // footer count
     const left = items.filter(i => !i.done).length;
     count.textContent = left + (left === 1 ? ' task left' : ' tasks left');
+
+    // progress
+    const total = items.length;
+    const doneCount = total - left;
+    const pct = total ? Math.round((doneCount / total) * 100) : 0;
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = total
+      ? pct + '% complete (' + doneCount + '/' + total + ')'
+      : '0% complete';
+  }
+
+  function startEdit(i, container, textEl) {
+    const editing = document.createElement('input');
+    editing.type = 'text';
+    editing.className = 'edit-input';
+    editing.value = items[i].text;
+    container.replaceChild(editing, textEl);
+    editing.focus();
+    editing.setSelectionRange(editing.value.length, editing.value.length);
+
+    const commit = () => {
+      const v = editing.value.trim();
+      if (v) items[i].text = v;
+      save(); render();
+    };
+    editing.addEventListener('keydown', e => {
+      if (e.key === 'Enter') commit();
+      if (e.key === 'Escape') render();
+    });
+    editing.addEventListener('blur', commit);
   }
 
   function add() {
     const text = input.value.trim();
     if (!text) return;
-    items.push({ text, done: false });
+    items.push({
+      text,
+      done: false,
+      priority: prioSelect.value,
+      due: dueDate.value || null
+    });
     input.value = '';
-    save();
-    render();
+    dueDate.value = '';
+    prioSelect.value = 'med';
+    save(); render();
   }
 
+  // ---- Events ----
   document.getElementById('add-btn').onclick = add;
   input.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+
+  searchBox.addEventListener('input', () => { search = searchBox.value.trim().toLowerCase(); render(); });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filter = btn.dataset.filter;
+      render();
+    };
+  });
+
   document.getElementById('clear-done').onclick = () => {
+    if (!items.some(i => i.done)) return;
     items = items.filter(i => !i.done);
-    save();
-    render();
+    save(); render();
+  };
+  document.getElementById('clear-all').onclick = () => {
+    if (items.length === 0) return;
+    if (confirm('Delete all tasks? This cannot be undone.')) {
+      items = [];
+      save(); render();
+    }
   };
 
   render();
